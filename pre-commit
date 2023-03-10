@@ -7,11 +7,18 @@
 #
 # To enable this hook, rename this file to "pre-commit".
 
-localOrginId=`git rev-parse origin`
+currentBranch=`git rev-parse --abbrev-ref HEAD`
+getLocalOrginCommand="git rev-parse origin/$currentBranch"
+
+localOrginId=`$getLocalOrginCommand`
+
 `git fetch`
 echo local origin commit id=$localOrginId
 remoteFetchId=`git rev-parse FETCH_HEAD`
+fetchHead="FETCH_HEAD"
+
 echo remote origin commit id=$remoteFetchId
+
 if [ $localOrginId = $remoteFetchId ]
 then
 	localHeadId=`git rev-parse HEAD`
@@ -35,6 +42,11 @@ then
 			exit 0
 		fi
 	fi
+elif [ $remoteFetchId = $fetchHead ]
+	then
+	echo your network cannot connect to the server, please check it!
+	exit 1
+else
+	echo remote has the latest code, please update first!
+	exit 1
 fi
-echo remote has the latest code, please update first!
-exit 1
